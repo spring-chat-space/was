@@ -2,6 +2,7 @@
 .gradle/
 build/
 out/
+*.class          # 컴파일된 클래스 파일 제외 (추가)
 
 # 2. Gradle Wrapper (빌드 환경 통일을 위해 jar 파일은 제외하지 않고 포함시킴)
 !gradle/wrapper/gradle-wrapper.jar

@@ -114,4 +114,38 @@ public class AdminUser {
         this.loginFailCount = 0;
         this.lockedUntil = null;
     }
+
+    /**
+     * 관리자가 사용자 정보를 수정할 때 호출.
+     *
+     * @param adminName   수정할 이름
+     * @param email       수정할 이메일 (원문, JPA Converter가 암호화)
+     * @param phoneNumber 수정할 전화번호 (원문, JPA Converter가 암호화)
+     * @param role        수정할 권한 (ROLE_USER / ROLE_ADMIN)
+     * @param useYn       수정할 활성화 여부 (Y / N)
+     */
+    public void updateInfo(String adminName, String email, String phoneNumber, String role, String useYn) {
+        this.adminName = adminName;
+        this.email = email;
+        this.phoneNumber = phoneNumber;
+        this.role = role;
+        this.useYn = useYn;
+    }
+
+    /**
+     * 비밀번호 변경 (BCrypt 암호화된 값을 직접 전달받음).
+     *
+     * @param encodedPassword BCrypt 암호화된 새 비밀번호
+     */
+    public void updatePassword(String encodedPassword) {
+        this.password = encodedPassword;
+    }
+
+    /**
+     * 계정 잠금 해제. 로그인 실패 횟수와 잠금 시간을 초기화한다.
+     */
+    public void unlock() {
+        this.loginFailCount = 0;
+        this.lockedUntil = null;
+    }
 }

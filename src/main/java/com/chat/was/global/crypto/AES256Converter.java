@@ -62,8 +62,8 @@ public class AES256Converter implements AttributeConverter<String, String> {
      */
     @Override
     public String convertToEntityAttribute(String dbData) {
-        if (dbData == null) {
-            return null;
+        if (dbData == null || dbData.isEmpty()) {
+            return dbData;
         }
         try {
             SecretKeySpec keySpec = new SecretKeySpec(secretKey.getBytes(StandardCharsets.UTF_8), "AES");
@@ -73,8 +73,9 @@ public class AES256Converter implements AttributeConverter<String, String> {
             byte[] decoded = Base64.getDecoder().decode(dbData);
             return new String(cipher.doFinal(decoded), StandardCharsets.UTF_8);
         } catch (Exception e) {
-            log.error("AES-256 복호화 처리 중 오류 발생: {}", e.getMessage(), e);
-            throw new RuntimeException("복호화 처리 중 오류가 발생했습니다.", e);
+            // DB에 암호화되지 않은 레거시 데이터가 있는 경우 등 복호화 불가 시 예외 전파 대신 null 반환
+            log.warn("AES-256 복호화 실패 (암호화되지 않은 데이터일 수 있음), null 반환 처리: {}", e.getMessage());
+            return null;
         }
     }
 }

@@ -18,8 +18,15 @@ public class SignupRequestVo {
     @NotBlank(message = "아이디는 필수 입력값입니다.")
     private String adminId;
 
-    /** 평문 비밀번호 (서비스 계층에서 BCrypt 암호화 처리) */
+    /**
+     * 평문 비밀번호 (서비스 계층에서 BCrypt 암호화 처리).
+     * 8자 이상, 대문자·소문자·숫자·특수문자(!@#$%^&* 등) 각 1개 이상 포함, 공백 불가.
+     */
     @NotBlank(message = "비밀번호는 필수 입력값입니다.")
+    @Pattern(
+        regexp = "^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d)(?=.*[!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>\\/?]).{8,}$",
+        message = "비밀번호는 8자 이상이며 대문자, 소문자, 숫자, 특수문자를 각각 1개 이상 포함해야 합니다."
+    )
     private String password;
 
     /** 관리자 이름 */

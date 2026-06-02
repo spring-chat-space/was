@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.chat.was.admin.dao.AdminMapper">
+
+    <!--
+        ResultMap: email, phone_number 컬럼은 AES256TypeHandler로 복호화.
+        map-underscore-to-camel-case=true 이므로 나머지 컬럼은 자동 매핑.
+    -->
+    <resultMap id="adminUserListItemMap" type="com.chat.was.admin.vo.AdminUserListItemVo">
+        <result property="adminId"      column="admin_id"/>
+        <result property="adminName"    column="admin_name"/>
+        <result property="email"        column="email"
+                typeHandler="com.chat.was.global.crypto.AES256TypeHandler"/>
+        <result property="phoneNumber"  column="phone_number"
+                typeHandler="com.chat.was.global.crypto.AES256TypeHandler"/>
+        <result property="role"         column="role"/>
+        <result property="useYn"        column="use_yn"/>
+        <result property="lockedUntil"  column="locked_until"/>
+        <result property="createdAt"    column="created_at"/>
+    </resultMap>
+
+    <!-- 공통 WHERE 절 (keyword, role, status 조건 조합) -->
+    <sql id="userSearchCondition">
+        <where>
+            <if test="keyword != null and keyword != ''">
+                AND (admin_id ILIKE CONCAT('%', #{keyword}, '%')
+                  OR admin_name ILIKE CONCAT('%', #{keyword}, '%'))
+            </if>
+            <if test="role != null and role != ''">
+                AND role = #{role}
+            </if>
+            <if test="status != null and status == 'active'">
+                AND use_yn = 'Y'
+                AND (locked_until IS NULL OR locked_until &lt;= NOW())
+            </if>
+            <if test="status != null and status == 'inactive'">
+                AND use_yn = 'N'
+            </if>
+            <if test="status != null and status == 'locked'">
+                AND locked_until IS NOT NULL AND locked_until &gt; NOW()
+            </if>
+        </where>
+    </sql>
+
+    <!--
+        조건 + 페이징 적용 사용자 목록 조회.
+        email, phone_number는 resultMap의 AES256TypeHandler로 자동 복호화.
+    -->
+    <select id="findUsers" parameterType="com.chat.was.admin.vo.AdminUserListRequestVo"
+            resultMap="adminUserListItemMap">
+        SELECT
+            admin_id,
+            admin_name,
+            email,
+            phone_number,
+            role,
+            use_yn,
+            locked_until,
+            created_at
+        FROM admin_user
+        <include refid="userSearchCondition"/>
+        ORDER BY created_at DESC
+        LIMIT #{size} OFFSET #{offset}
+    </select>
+
+    <!--
+        전체 건수 조회 (페이지 수 계산용).
+    -->
+    <select id="countUsers" parameterType="com.chat.was.admin.vo.AdminUserListRequestVo"
+            resultType="long">
+        SELECT COUNT(*)
+        FROM admin_user
+        <include refid="userSearchCondition"/>
+    </select>
+
+</mapper>
