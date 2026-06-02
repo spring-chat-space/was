@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.chat.was.chat.dao.ChatMapper">
+
+    <!--
+        채팅방 검색 쿼리.
+        채팅방 제목(title)에 키워드가 포함되거나,
+        해당 방에 속한 메시지(chat_message.content)에 키워드가 포함된 방을 반환한다.
+        use_yn = 'Y' 인 활성 채팅방만 대상으로 한다.
+    -->
+    <select id="searchRooms" resultType="com.chat.was.chat.vo.ChatRoom">
+        SELECT DISTINCT
+            cr.room_id,
+            cr.admin_id,
+            cr.title,
+            cr.use_yn,
+            cr.created_at,
+            cr.updated_at
+        FROM chat_room cr
+        WHERE cr.admin_id = #{adminId}
+          AND cr.use_yn = 'Y'
+          AND (
+            <!-- 채팅방 제목에 검색어 포함 여부 -->
+            cr.title ILIKE CONCAT('%', #{keyword}, '%')
+            OR
+            <!-- 해당 방의 메시지 내용에 검색어 포함 여부 (서브쿼리) -->
+            EXISTS (
+                SELECT 1
+                FROM chat_message cm
+                WHERE cm.room_id = cr.room_id
+                  AND cm.content ILIKE CONCAT('%', #{keyword}, '%')
+            )
+        )
+        ORDER BY cr.updated_at DESC
+    </select>
+
+</mapper>

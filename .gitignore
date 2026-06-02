@@ -1,0 +1,16 @@
+# 1. Gradle 빌드 결과물 및 캐시 (자동 생성되므로 제외)
+.gradle/
+build/
+out/
+
+# 2. Gradle Wrapper (빌드 환경 통일을 위해 jar 파일은 제외하지 않고 포함시킴)
+!gradle/wrapper/gradle-wrapper.jar
+
+# 3. 로그 파일 (실행 중 지속적으로 생성되므로 제외)
+*.log
+
+# 4. IDE 및 OS 환경 파일
+.idea/
+.vscode/
+*.iml
+.DS_Store

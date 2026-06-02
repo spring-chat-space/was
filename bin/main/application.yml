@@ -1,0 +1,19 @@
+spring:
+  application:
+    name: chat-was
+  profiles:
+    active: local
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+
+mybatis:
+  mapper-locations: classpath:mapper/**/*.xml
+  configuration:
+    map-underscore-to-camel-case: true
+
+crypto:
+  aes256:
+    secret-key: ChatSiteAES256Key2024123456789AB
+    iv: ChatSiteAESIV16B
