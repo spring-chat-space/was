@@ -15,3 +15,7 @@ out/
 .vscode/
 *.iml
 .DS_Store
+bin/             # STS/Eclipse 빌드 결과물 폴더 제외
+.settings/       # STS/Eclipse 설정 폴더 제외
+.classpath       # STS/Eclipse 클래스패스 파일 제외
+.project         # STS/Eclipse 프로젝트 파일 제외
