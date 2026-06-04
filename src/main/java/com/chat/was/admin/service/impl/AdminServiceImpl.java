@@ -5,6 +5,9 @@ import com.chat.was.admin.service.AdminService;
 import com.chat.was.admin.vo.*;
 import com.chat.was.auth.dao.AdminUserRepository;
 import com.chat.was.auth.vo.AdminUser;
+import com.chat.was.chat.dao.ChatMessageRepository;
+import com.chat.was.chat.dao.ChatRoomRepository;
+import com.chat.was.chat.vo.ChatRoom;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -27,6 +30,8 @@ public class AdminServiceImpl implements AdminService {
 
     private final AdminMapper adminMapper;
     private final AdminUserRepository adminUserRepository;
+    private final ChatRoomRepository chatRoomRepository;
+    private final ChatMessageRepository chatMessageRepository;
     private final PasswordEncoder passwordEncoder;
 
     /** 임시 비밀번호 생성에 사용할 문자 집합 */
@@ -115,16 +120,25 @@ public class AdminServiceImpl implements AdminService {
 
     /**
      * {@inheritDoc}
-     * use_yn = 'N' 으로 논리 삭제 처리.
+     * use_yn = 'D' 로 논리 삭제 처리.
+     * 'N'(비활성)과 구분하여 목록 조회에서 영구적으로 제외된다.
      */
     @Override
     @Transactional
     public void deleteUser(String adminId) {
         log.info("사용자 논리 삭제 - adminId: {}", adminId);
         AdminUser adminUser = findAdminUserOrThrow(adminId);
-        // 논리 삭제: use_yn = 'N', 비활성화 처리
+
+        // 해당 사용자의 활성 채팅방을 모두 조회하여 메시지 물리 삭제 → 채팅방 논리 삭제
+        List<ChatRoom> rooms = chatRoomRepository.findByUserSeqAndUseYnOrderByUpdatedAtDesc(adminUser.getUserSeq(), "Y");
+        rooms.forEach(room -> chatMessageRepository.deleteAllByRoomId(room.getRoomId()));
+        rooms.forEach(ChatRoom::delete);
+        chatRoomRepository.saveAll(rooms);
+        log.info("채팅방 {}개 연쇄 삭제 완료 - adminId: {}", rooms.size(), adminId);
+
+        // 사용자 논리 삭제: use_yn = 'D' (비활성 'N'과 구분되는 삭제 상태)
         adminUser.updateInfo(adminUser.getAdminName(), adminUser.getEmail(),
-                adminUser.getPhoneNumber(), adminUser.getRole(), "N");
+                adminUser.getPhoneNumber(), adminUser.getRole(), "D");
         adminUserRepository.save(adminUser);
         log.info("사용자 논리 삭제 완료 - adminId: {}", adminId);
     }

@@ -19,9 +19,9 @@ public interface ChatMapper {
      * 채팅방 제목(title) 또는 해당 방의 메시지 내용(content)에 검색어가 포함된 채팅방 목록을 반환한다.
      * use_yn = 'Y' 인 활성 채팅방만 조회한다.
      *
-     * @param adminId 검색할 사용자 아이디
+     * @param userSeq 검색할 사용자 시퀀스 PK
      * @param keyword 검색어 (title 또는 message content에 LIKE 적용)
      * @return 검색 결과 채팅방 목록
      */
-    List<ChatRoom> searchRooms(@Param("adminId") String adminId, @Param("keyword") String keyword);
+    List<ChatRoom> searchRooms(@Param("userSeq") Long userSeq, @Param("keyword") String keyword);
 }

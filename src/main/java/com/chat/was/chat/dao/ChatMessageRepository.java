@@ -2,6 +2,9 @@ package com.chat.was.chat.dao;
 
 import com.chat.was.chat.vo.ChatMessage;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
@@ -37,4 +40,14 @@ public interface ChatMessageRepository extends JpaRepository<ChatMessage, Long> 
      * @return 시간순 메시지 목록
      */
     List<ChatMessage> findByRoomIdOrderByCreatedAtAsc(Long roomId);
+
+    /**
+     * 특정 채팅방의 모든 메시지를 물리 삭제한다.
+     * 채팅방 삭제 시 연쇄 삭제에 사용한다. 단일 DELETE 쿼리로 처리된다.
+     *
+     * @param roomId 삭제할 채팅방 ID
+     */
+    @Modifying
+    @Query("DELETE FROM ChatMessage m WHERE m.roomId = :roomId")
+    void deleteAllByRoomId(@Param("roomId") Long roomId);
 }

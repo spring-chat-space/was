@@ -9,7 +9,7 @@ import java.util.Optional;
  * AdminUser 엔티티 JPA Repository.
  * 단건 조회, 등록 등 단순 CRUD는 JPA를 통해 처리한다.
  */
-public interface AdminUserRepository extends JpaRepository<AdminUser, String> {
+public interface AdminUserRepository extends JpaRepository<AdminUser, Long> {
 
     /**
      * 아이디로 관리자 사용자 조회.

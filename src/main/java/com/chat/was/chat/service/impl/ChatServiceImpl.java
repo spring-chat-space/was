@@ -1,5 +1,6 @@
 package com.chat.was.chat.service.impl;
 
+import com.chat.was.auth.dao.AdminUserRepository;
 import com.chat.was.chat.dao.ChatMapper;
 import com.chat.was.chat.dao.ChatMessageRepository;
 import com.chat.was.chat.dao.ChatRoomRepository;
@@ -28,6 +29,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class ChatServiceImpl implements ChatService {
 
+    private final AdminUserRepository adminUserRepository;
     private final ChatRoomRepository chatRoomRepository;
     private final ChatMessageRepository chatMessageRepository;
     private final ChatMapper chatMapper;
@@ -45,7 +47,8 @@ public class ChatServiceImpl implements ChatService {
     @Override
     @Transactional(readOnly = true)
     public List<ChatRoomVo> getRooms(String adminId) {
-        return chatRoomRepository.findByAdminIdAndUseYnOrderByUpdatedAtDesc(adminId, "Y")
+        Long userSeq = resolveUserSeq(adminId);
+        return chatRoomRepository.findByUserSeqAndUseYnOrderByUpdatedAtDesc(userSeq, "Y")
                 .stream()
                 .map(r -> new ChatRoomVo(r.getRoomId(), r.getTitle(), r.getUpdatedAt(), r.getCreatedAt()))
                 .collect(Collectors.toList());
@@ -60,7 +63,8 @@ public class ChatServiceImpl implements ChatService {
         if (keyword == null || keyword.isBlank()) {
             return getRooms(adminId);
         }
-        return chatMapper.searchRooms(adminId, keyword)
+        Long userSeq = resolveUserSeq(adminId);
+        return chatMapper.searchRooms(userSeq, keyword)
                 .stream()
                 .map(r -> new ChatRoomVo(r.getRoomId(), r.getTitle(), r.getUpdatedAt(), r.getCreatedAt()))
                 .collect(Collectors.toList());
@@ -78,16 +82,18 @@ public class ChatServiceImpl implements ChatService {
     @Override
     @Transactional
     public ChatSendResponseVo sendMessage(ChatSendRequestVo request) {
+        Long userSeq = resolveUserSeq(request.getAdminId());
+
         // 신규 채팅방 생성 또는 기존 방 조회
         boolean isNewRoom = (request.getRoomId() == null);
         ChatRoom chatRoom;
         if (isNewRoom) {
             chatRoom = chatRoomRepository.save(ChatRoom.builder()
-                    .adminId(request.getAdminId())
+                    .userSeq(userSeq)
                     .build());
         } else {
-            chatRoom = chatRoomRepository.findByRoomIdAndAdminIdAndUseYn(
-                    request.getRoomId(), request.getAdminId(), "Y")
+            chatRoom = chatRoomRepository.findByRoomIdAndUserSeqAndUseYn(
+                    request.getRoomId(), userSeq, "Y")
                     .orElseThrow(() -> new IllegalArgumentException("채팅방을 찾을 수 없습니다."));
         }
         Long roomId = chatRoom.getRoomId();
@@ -134,8 +140,9 @@ public class ChatServiceImpl implements ChatService {
     @Override
     @Transactional(readOnly = true)
     public List<ChatMessageVo> getMessages(Long roomId, String adminId) {
+        Long userSeq = resolveUserSeq(adminId);
         // 소유자 검증: 해당 방이 요청한 사용자의 방인지 확인
-        chatRoomRepository.findByRoomIdAndAdminIdAndUseYn(roomId, adminId, "Y")
+        chatRoomRepository.findByRoomIdAndUserSeqAndUseYn(roomId, userSeq, "Y")
                 .orElseThrow(() -> new IllegalArgumentException("채팅방을 찾을 수 없습니다."));
         return chatMessageRepository.findByRoomIdOrderByCreatedAtAsc(roomId)
                 .stream()
@@ -150,11 +157,27 @@ public class ChatServiceImpl implements ChatService {
     @Override
     @Transactional
     public void deleteRoom(Long roomId, String adminId) {
-        ChatRoom chatRoom = chatRoomRepository.findByRoomIdAndAdminIdAndUseYn(roomId, adminId, "Y")
+        Long userSeq = resolveUserSeq(adminId);
+        ChatRoom chatRoom = chatRoomRepository.findByRoomIdAndUserSeqAndUseYn(roomId, userSeq, "Y")
                 .orElseThrow(() -> new IllegalArgumentException("채팅방을 찾을 수 없습니다."));
+        // 메시지 물리 삭제 → 채팅방 논리 삭제 순서로 처리
+        chatMessageRepository.deleteAllByRoomId(roomId);
         chatRoom.delete();
         chatRoomRepository.save(chatRoom);
         log.info("채팅방 삭제 완료 - roomId: {}, adminId: {}", roomId, adminId);
+    }
+
+    /**
+     * adminId(로그인 ID)로 user_seq를 조회하는 내부 헬퍼.
+     * 사용자가 존재하지 않으면 IllegalArgumentException을 던진다.
+     *
+     * @param adminId 조회할 관리자 로그인 아이디
+     * @return admin_user.user_seq 값
+     */
+    private Long resolveUserSeq(String adminId) {
+        return adminUserRepository.findByAdminId(adminId)
+                .map(u -> u.getUserSeq())
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다: " + adminId));
     }
 
     /**

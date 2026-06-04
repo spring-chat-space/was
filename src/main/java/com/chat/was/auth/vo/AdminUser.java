@@ -24,9 +24,14 @@ import java.time.LocalDateTime;
 @EntityListeners(AuditingEntityListener.class)
 public class AdminUser {
 
-    /** 관리자 아이디 (PK, 사용자 직접 입력) */
+    /** 시퀀스 PK (AUTO_INCREMENT, Surrogate Key) */
     @Id
-    @Column(name = "admin_id", nullable = false, length = 50)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "user_seq")
+    private Long userSeq;
+
+    /** 관리자 로그인 아이디 (UNIQUE, 자연키로 강등) */
+    @Column(name = "admin_id", nullable = false, length = 50, unique = true)
     private String adminId;
 
     /** BCrypt 단방향 암호화된 비밀번호 */

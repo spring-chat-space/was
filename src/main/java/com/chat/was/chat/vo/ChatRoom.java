@@ -28,9 +28,9 @@ public class ChatRoom {
     @Column(name = "room_id")
     private Long roomId;
 
-    /** 방 생성 사용자 ID (admin_user.admin_id 참조) */
-    @Column(name = "admin_id", nullable = false, length = 50)
-    private String adminId;
+    /** 방 생성 사용자 시퀀스 PK (admin_user.user_seq 참조) */
+    @Column(name = "user_seq", nullable = false)
+    private Long userSeq;
 
     /** 채팅방 제목 (첫 메시지 전송 후 AI가 자동 생성) */
     @Column(name = "title", length = 200)
@@ -53,11 +53,11 @@ public class ChatRoom {
     /**
      * 채팅방 생성 빌더.
      *
-     * @param adminId 방 생성 사용자 아이디
+     * @param userSeq 방 생성 사용자 시퀀스 PK
      */
     @Builder
-    public ChatRoom(String adminId) {
-        this.adminId = adminId;
+    public ChatRoom(Long userSeq) {
+        this.userSeq = userSeq;
         this.title = "새 채팅";
         this.useYn = "Y";
     }

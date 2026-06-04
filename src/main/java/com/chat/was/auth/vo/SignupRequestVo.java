@@ -37,10 +37,12 @@ public class SignupRequestVo {
     @NotBlank(message = "이메일은 필수 입력값입니다.")
     private String email;
 
-    /** 전화번호 (서비스 계층에서 AES-256 암호화 후 저장) */
-    @NotBlank(message = "전화번호는 필수 입력값입니다.")
+    /**
+     * 전화번호 (선택 입력, 서비스 계층에서 AES-256 암호화 후 저장).
+     * 입력된 경우에만 @Pattern 형식 검증이 적용된다 (null/빈 값은 통과).
+     */
     @Pattern(
-        regexp = "^01([0|1|6|7|8|9])-?([0-9]{3,4})-?([0-9]{4})$",
+        regexp = "^$|^01([0|1|6|7|8|9])-?([0-9]{3,4})-?([0-9]{4})$",
         message = "올바른 휴대폰 번호 형식이 아닙니다. (예: 010-1234-5678)"
     )
     private String phoneNumber;

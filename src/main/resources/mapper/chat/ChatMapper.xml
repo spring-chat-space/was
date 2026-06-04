@@ -13,13 +13,13 @@
     <select id="searchRooms" resultType="com.chat.was.chat.vo.ChatRoom">
         SELECT DISTINCT
             cr.room_id,
-            cr.admin_id,
+            cr.user_seq,
             cr.title,
             cr.use_yn,
             cr.created_at,
             cr.updated_at
         FROM chat_room cr
-        WHERE cr.admin_id = #{adminId}
+        WHERE cr.user_seq = #{userSeq}
           AND cr.use_yn = 'Y'
           AND (
             <!-- 채팅방 제목에 검색어 포함 여부 -->

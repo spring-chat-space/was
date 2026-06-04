@@ -22,26 +22,26 @@
     </resultMap>
 
     <!-- 공통 WHERE 절 (keyword, role, status 조건 조합) -->
+    <!-- use_yn = 'D' (논리 삭제)는 모든 조회에서 항상 제외 -->
     <sql id="userSearchCondition">
-        <where>
-            <if test="keyword != null and keyword != ''">
-                AND (admin_id ILIKE CONCAT('%', #{keyword}, '%')
-                  OR admin_name ILIKE CONCAT('%', #{keyword}, '%'))
-            </if>
-            <if test="role != null and role != ''">
-                AND role = #{role}
-            </if>
-            <if test="status != null and status == 'active'">
-                AND use_yn = 'Y'
-                AND (locked_until IS NULL OR locked_until &lt;= NOW())
-            </if>
-            <if test="status != null and status == 'inactive'">
-                AND use_yn = 'N'
-            </if>
-            <if test="status != null and status == 'locked'">
-                AND locked_until IS NOT NULL AND locked_until &gt; NOW()
-            </if>
-        </where>
+        WHERE use_yn != 'D'
+        <if test="keyword != null and keyword != ''">
+            AND (admin_id ILIKE CONCAT('%', #{keyword}, '%')
+              OR admin_name ILIKE CONCAT('%', #{keyword}, '%'))
+        </if>
+        <if test="role != null and role != ''">
+            AND role = #{role}
+        </if>
+        <if test="status != null and status == 'active'">
+            AND use_yn = 'Y'
+            AND (locked_until IS NULL OR locked_until &lt;= NOW())
+        </if>
+        <if test="status != null and status == 'inactive'">
+            AND use_yn = 'N'
+        </if>
+        <if test="status != null and status == 'locked'">
+            AND locked_until IS NOT NULL AND locked_until &gt; NOW()
+        </if>
     </sql>
 
     <!--
