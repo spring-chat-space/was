@@ -1,8 +1,8 @@
 package com.chat.was.guide.service.impl;
 
 import com.chat.was.auth.dao.AdminUserRepository;
-import com.chat.was.file.dao.FileRepository;
-import com.chat.was.file.vo.FileVo;
+import com.chat.was.common.file.dao.FileRepository;
+import com.chat.was.common.file.vo.FileVo;
 import com.chat.was.global.exception.BusinessException;
 import com.chat.was.guide.dao.GuideMapper;
 import com.chat.was.guide.dao.GuideLikeRepository;
@@ -11,15 +11,14 @@ import com.chat.was.guide.service.GuideService;
 import com.chat.was.guide.vo.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
  * 가이드 비즈니스 로직 구현체.
- * 좋아요 토글은 UNIQUE 제약 위반(DataIntegrityViolationException)을 활용한 낙관적 처리.
  */
 @Slf4j
 @Service
@@ -125,9 +124,20 @@ public class GuideServiceImpl implements GuideService {
         Guide guide = guideRepository.findByGuideSeqAndUseYn(guideSeq, "Y")
                 .orElseThrow(() -> new BusinessException("가이드를 찾을 수 없습니다."));
 
+        // 예외 기반 토글 대신 선조회 후 분기하는 check-then-act 패턴 사용.
+        // @Transactional 내에서 DataIntegrityViolationException을 catch하면
+        // JDBC 레벨 트랜잭션이 오염되어 이후 쿼리가 모두 실패하므로 이 방식을 사용.
+        Optional<GuideLike> existing = guideLikeRepository.findByGuideSeqAndUserSeq(guideSeq, userSeq);
+
         boolean liked;
-        try {
-            // 좋아요 INSERT 시도 — UNIQUE 제약 위반이면 이미 좋아요 누른 것
+        if (existing.isPresent()) {
+            // 이미 좋아요 → 취소
+            guideLikeRepository.delete(existing.get());
+            guide.decrementLike();
+            liked = false;
+            log.info("좋아요 취소 - guideSeq: {}, userSeq: {}", guideSeq, userSeq);
+        } else {
+            // 좋아요 없음 → 추가
             guideLikeRepository.save(GuideLike.builder()
                     .guideSeq(guideSeq)
                     .userSeq(userSeq)
@@ -135,14 +145,6 @@ public class GuideServiceImpl implements GuideService {
             guide.incrementLike();
             liked = true;
             log.info("좋아요 추가 - guideSeq: {}, userSeq: {}", guideSeq, userSeq);
-        } catch (DataIntegrityViolationException e) {
-            // UNIQUE 위반 → 이미 좋아요 누름 → 취소
-            GuideLike existing = guideLikeRepository.findByGuideSeqAndUserSeq(guideSeq, userSeq)
-                    .orElseThrow(() -> new BusinessException("좋아요 처리 중 오류가 발생했습니다."));
-            guideLikeRepository.delete(existing);
-            guide.decrementLike();
-            liked = false;
-            log.info("좋아요 취소 - guideSeq: {}, userSeq: {}", guideSeq, userSeq);
         }
         guideRepository.save(guide);
         return new GuideLikeResponseVo(guide.getLikeCount(), liked);

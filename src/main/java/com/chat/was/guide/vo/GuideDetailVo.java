@@ -1,6 +1,7 @@
 package com.chat.was.guide.vo;
 
-import com.chat.was.file.vo.FileVo;
+import com.chat.was.common.file.vo.FileVo;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import java.time.LocalDateTime;
@@ -31,6 +32,7 @@ public class GuideDetailVo {
     /** 현재 요청자의 좋아요 여부 */
     private boolean myLiked;
     /** 현재 요청자의 소유 여부 */
+    @JsonProperty("isMine")
     private boolean isMine;
     /** 생성 일시 */
     private LocalDateTime createdAt;

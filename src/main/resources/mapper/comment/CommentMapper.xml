@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.chat.was.comment.dao.CommentMapper">
+<mapper namespace="com.chat.was.common.comment.dao.CommentMapper">
 
     <!-- 최상위 댓글 조회 -->
-    <select id="findRootComments" resultType="com.chat.was.comment.vo.CommentVo">
+    <select id="findRootComments" resultType="com.chat.was.common.comment.vo.CommentVo">
         SELECT
             c.comment_seq AS commentSeq,
             c.parent_seq AS parentSeq,
@@ -22,7 +22,7 @@
     </select>
 
     <!-- 대댓글 조회 -->
-    <select id="findReplies" resultType="com.chat.was.comment.vo.CommentVo">
+    <select id="findReplies" resultType="com.chat.was.common.comment.vo.CommentVo">
         SELECT
             c.comment_seq AS commentSeq,
             c.parent_seq AS parentSeq,
