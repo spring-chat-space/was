@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
 
 /**
  * 채팅 비즈니스 로직 구현체.
- * Google Gemini 1.5 Flash API 연동, 대화 맥락 유지, 채팅방 제목 자동 생성 기능을 처리한다.
+ * Google Gemini 2.5 Flash API 연동, 대화 맥락 유지, 채팅방 제목 자동 생성 기능을 처리한다.
  */
 @Slf4j
 @Service
@@ -37,7 +37,7 @@ public class ChatServiceImpl implements ChatService {
     private final GeminiConfig geminiConfig;
 
     /**
-     * Gemini API 모델 경로 상수 (gemini-2.0-flash 사용)
+     * Gemini API 모델 경로 상수 (gemini-2.5-flash 사용)
      */
     private static final String GEMINI_MODEL = "/v1beta/models/gemini-2.5-flash:generateContent";
 
@@ -181,7 +181,7 @@ public class ChatServiceImpl implements ChatService {
     }
 
     /**
-     * Gemini 1.5 Flash API를 호출하여 AI 응답을 받는다.
+     * Gemini 2.5 Flash API를 호출하여 AI 응답을 받는다.
      * 대화 맥락(recentMessages)을 contents 배열에 포함하여 전달한다.
      *
      * @param recentMessages 기존 대화 메시지 목록 (USER/AI 교대)

@@ -55,7 +55,7 @@ public class ChatApiController {
 
     /**
      * 메시지 전송 및 AI 응답 수신 API.
-     * Gemini 1.5 Flash 모델 호출 후 응답을 반환한다.
+     * Gemini 2.5 Flash 모델 호출 후 응답을 반환한다.
      *
      * @param request 메시지 전송 요청 (adminId, roomId, content)
      * @return AI 응답, roomId, 신규 채팅방 제목(해당 시)

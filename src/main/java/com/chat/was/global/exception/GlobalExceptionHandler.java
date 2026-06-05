@@ -2,10 +2,12 @@ package com.chat.was.global.exception;
 
 import com.chat.was.global.common.ApiResponse;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 
 import java.util.stream.Collectors;
 
@@ -44,6 +46,33 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiResponse<Void>> handleIllegalArgumentException(IllegalArgumentException e) {
         log.error("비즈니스 로직 오류 발생: {}", e.getMessage());
         return ResponseEntity.badRequest().body(ApiResponse.error(e.getMessage()));
+    }
+
+    /**
+     * 비즈니스 규칙 위반 처리.
+     * BusinessException 발생 시 400 Bad Request로 응답.
+     *
+     * @param e 발생한 예외
+     * @return 400 상태코드와 에러 메시지를 담은 ApiResponse
+     */
+    @ExceptionHandler(BusinessException.class)
+    public ResponseEntity<ApiResponse<Void>> handleBusinessException(BusinessException e) {
+        log.error("비즈니스 규칙 위반: {}", e.getMessage());
+        return ResponseEntity.badRequest().body(ApiResponse.error(e.getMessage()));
+    }
+
+    /**
+     * 파일 크기 초과 처리.
+     * MaxUploadSizeExceededException 발생 시 413 Payload Too Large로 응답.
+     *
+     * @param e 발생한 예외
+     * @return 413 상태코드와 에러 메시지를 담은 ApiResponse
+     */
+    @ExceptionHandler(MaxUploadSizeExceededException.class)
+    public ResponseEntity<ApiResponse<Void>> handleMaxUploadSizeExceededException(MaxUploadSizeExceededException e) {
+        log.error("파일 크기 초과: {}", e.getMessage());
+        return ResponseEntity.status(HttpStatus.PAYLOAD_TOO_LARGE)
+                .body(ApiResponse.error("파일 크기가 허용 범위를 초과했습니다."));
     }
 
     /**

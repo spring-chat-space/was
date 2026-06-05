@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.chat.was.comment.dao.CommentMapper">
+
+    <!-- 최상위 댓글 조회 -->
+    <select id="findRootComments" resultType="com.chat.was.comment.vo.CommentVo">
+        SELECT
+            c.comment_seq AS commentSeq,
+            c.parent_seq AS parentSeq,
+            u.admin_name AS authorName,
+            c.content,
+            c.created_at AS createdAt,
+            CASE WHEN c.user_seq = #{userSeq} THEN true ELSE false END AS isMine
+        FROM comment c
+        JOIN admin_user u ON c.user_seq = u.user_seq
+        WHERE c.domain_type = #{domainType}
+          AND c.ref_id = #{refId}
+          AND c.use_yn = 'Y'
+          AND c.parent_seq IS NULL
+        ORDER BY c.created_at ASC
+    </select>
+
+    <!-- 대댓글 조회 -->
+    <select id="findReplies" resultType="com.chat.was.comment.vo.CommentVo">
+        SELECT
+            c.comment_seq AS commentSeq,
+            c.parent_seq AS parentSeq,
+            u.admin_name AS authorName,
+            c.content,
+            c.created_at AS createdAt,
+            CASE WHEN c.user_seq = #{userSeq} THEN true ELSE false END AS isMine
+        FROM comment c
+        JOIN admin_user u ON c.user_seq = u.user_seq
+        WHERE c.parent_seq = #{parentSeq}
+          AND c.use_yn = 'Y'
+        ORDER BY c.created_at ASC
+    </select>
+
+</mapper>

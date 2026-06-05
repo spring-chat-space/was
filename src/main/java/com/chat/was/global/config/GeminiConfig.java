@@ -9,7 +9,7 @@ import org.springframework.web.client.RestClient;
 
 /**
  * Google Gemini API 연동용 RestClient 설정.
- * Gemini 1.5 Flash 모델 호출에 사용하는 전용 RestClient Bean을 등록한다.
+ * Gemini 2.5 Flash 모델 호출에 사용하는 전용 RestClient Bean을 등록한다.
  */
 @Configuration
 public class GeminiConfig {
