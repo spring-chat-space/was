@@ -4,8 +4,15 @@ server:
 spring:
   datasource:
     driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://localhost:5432/postgres
-    username: postgres
+    url: jdbc:postgresql://localhost:5432/chat_space_db
+    username: chatdev
     password: 1234
   jpa:
-    show-sql: true
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+
+# p6spy: 개발 서버에서도 실제 파라미터 바인딩된 SQL 확인 가능
+logging:
+  level:
+    p6spy: info

@@ -9,8 +9,13 @@ spring:
       max-request-size: 20MB
   jpa:
     hibernate:
-      ddl-auto: update
-    show-sql: true
+      ddl-auto: validate
+    show-sql: false
+
+# p6spy SQL 로그: 기본값 off — local/dev 프로파일에서만 활성화
+logging:
+  level:
+    p6spy: off
 
 mybatis:
   mapper-locations: classpath:mapper/**/*.xml

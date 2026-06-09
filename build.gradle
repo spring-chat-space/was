@@ -23,6 +23,9 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-security'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter:3.0.3'
+    // 실제 파라미터값이 바인딩된 완성형 SQL 로그 (JPA + MyBatis 공통 적용)
+    // 프로파일별 활성화: local/dev → logging.level.p6spy: info, prod → off
+    implementation 'com.github.gavlyukovskiy:p6spy-spring-boot-starter:1.9.2'
     runtimeOnly 'org.postgresql:postgresql'
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
