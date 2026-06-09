@@ -20,5 +20,5 @@ bin/             # STS/Eclipse 빌드 결과물 폴더 제외
 .classpath       # STS/Eclipse 클래스패스 파일 제외
 .project         # STS/Eclipse 프로젝트 파일 제외
 
-# 로컬 환경 설정 파일 제외
-src/main/resources/application-local.yml
+# 로컬 환경 설정 파일 제외 (어느 경로에 있든 파일명으로 전체 제외)
+**/application-local.yml

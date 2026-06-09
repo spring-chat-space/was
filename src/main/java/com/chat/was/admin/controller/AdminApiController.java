@@ -66,7 +66,7 @@ public class AdminApiController {
     public ResponseEntity<ApiResponse<AdminUserDetailVo>> getUser(@PathVariable("adminId") String adminId) {
         log.info("사용자 상세 조회 API - adminId: {}", adminId);
         AdminUserDetailVo detail = adminService.getUser(adminId);
-        return ResponseEntity.ok(ApiResponse.success(detail));
+        return ResponseEntity.ok(ApiResponse.success(detail));   
     }
 
     /**
